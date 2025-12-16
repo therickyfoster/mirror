@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>🌌 PRA Ultimate Shell</title>
+  <style>
+    /* === Global Theme === */
+    :root {
+      --bg-dark: #0b0f17;
+      --card: rgba(25, 35, 55, 0.65);
+      --border: #1c2a44;
+      --accent: #76e4f7;
+      --accent2: #8effc1;
+      --danger: #ff6b6b;
+      --ok: #8cff8c;
+      --muted: #a9b4c0;
+    }
+    *{box-sizing:border-box;}
+    html,body {margin:0; height:100%; background:var(--bg-dark); color:white; font-family:Segoe UI,Inter,system-ui;}
+    h1,h2,h3 {margin:0;}
+    a {color:var(--accent);}
+    button {cursor:pointer;}
+    
+    /* === Parallax Galaxy Background === */
+    body::before, body::after {
+      content:"";
+      position:fixed; top:0; left:0; right:0; bottom:0;
+      background:radial-gradient(circle at 20% 30%, rgba(118,228,247,0.2), transparent 60%),
+                 radial-gradient(circle at 80% 70%, rgba(142,255,193,0.15), transparent 70%);
+      z-index:-2;
+    }
+    .stars {
+      background:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><circle cx='200' cy='200' r='2' fill='white'/></svg>") repeat;
+      position:fixed; top:0; left:0; right:0; bottom:0;
+      z-index:-1;
+      animation: drift 60s linear infinite;
+    }
+    @keyframes drift { from{background-position:0 0;} to{background-position:1000px 1000px;} }
+    
+    /* === Aero Glass Menus === */
+    header {
+      backdrop-filter: blur(10px);
+      background:rgba(15,25,40,0.75);
+      border-bottom:1px solid var(--border);
+      padding:12px 20px;
+      display:flex; align-items:center; justify-content:space-between;
+      position:sticky; top:0; z-index:10;
+    }
+    nav button {
+      margin:0 4px; padding:8px 14px; border-radius:8px;
+      background:rgba(255,255,255,0.05); border:1px solid var(--border);
+      color:white;
+    }
+    
+    /* === Layout === */
+    main {display:grid; grid-template-columns:280px 1fr; gap:16px; padding:16px;}
+    .card {
+      background:var(--card); backdrop-filter:blur(12px);
+      border:1px solid var(--border); border-radius:12px; padding:12px;
+    }
+    details {margin:8px 0;}
+    summary {cursor:pointer; font-weight:600;}
+    
+    /* === Collapsible Sidebar === */
+    aside {display:flex; flex-direction:column; gap:12px;}
+    
+    /* === Chart Placeholder === */
+    canvas {width:100%!important; background:#111a2b; border-radius:8px;}
+    
+    /* === Quest Log === */
+    .quest-log li {margin:6px 0;}
+    
+    /* === Avatar Selector === */
+    .avatars img {width:48px; height:48px; border-radius:50%; cursor:pointer; margin:4px; border:2px solid transparent;}
+    .avatars img.selected {border-color:var(--accent);}
+    
+    /* === Accessibility Toggles === */
+    .access button {margin:4px;}
+    
+    footer {text-align:center; padding:12px; font-size:12px; color:var(--muted);}
+  </style>
+</head>
+<body>
+  <div class="stars"></div>
+  <header>
+    <h1>🌍 Peace OS Shell</h1>
+    <nav>
+      <button onclick="toggleSidebar()">☰ Menu</button>
+      <button onclick="syncNow()">🔄 Sync</button>
+      <button onclick="exportProofs()">📥 Export</button>
+    </nav>
+  </header>
+  
+  <main>
+    <!-- Sidebar -->
+    <aside id="sidebar">
+      <div class="card">
+        <h2>⚙️ Controls</h2>
+        <details open><summary>Feeds</summary>
+          <ul id="feedList"><li>Reuters 🌍</li><li>Al Jazeera 📰</li><li>UN News 🇺🇳</li></ul>
+        </details>
+        <details><summary>Proof Explorer</summary>
+          <p class="small">Ledger of SHA-256 attestations will appear here.</p>
+          <ul id="proofList"></ul>
+        </details>
+        <details><summary>Accessibility</summary>
+          <div class="access">
+            <button onclick="toggleContrast()">🔲 Contrast</button>
+            <button onclick="increaseFont()">🔎 Text +</button>
+          </div>
+        </details>
+      </div>
+      
+      <div class="card">
+        <h2>🧙 Avatar</h2>
+        <div class="avatars">
+          <img src="https://emojiapi.dev/api/v1/owl/64.png" onclick="selectAvatar(this)">
+          <img src="https://emojiapi.dev/api/v1/mushroom/64.png" onclick="selectAvatar(this)">
+          <img src="https://emojiapi.dev/api/v1/rocket/64.png" onclick="selectAvatar(this)">
+        </div>
+      </div>
+    </aside>
+    
+    <!-- Main content -->
+    <section>
+      <div class="card">
+        <h2>📊 Peace Trend</h2>
+        <canvas id="peaceChart" height="120"></canvas>
+      </div>
+      <div class="card">
+        <h2>🗒️ Quest Log</h2>
+        <ul class="quest-log">
+          <li>🌱 Plant 1000 trees in Fort McMurray</li>
+          <li>🤝 Facilitate 3 ceasefire dialogues</li>
+          <li>📡 Deploy EcoDraft node prototype</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>🛠️ Modules</h2>
+        <p>Drop in panels here: charts, pads, petitions, action consoles.</p>
+      </div>
+    </section>
+  </main>
+  
+  <footer>💫 PRA Ultimate Shell • Peace = the inevitable upgrade</footer>
+  
+  <script>
+    // === Placeholder Chart.js-lite (sine wave animation) ===
+    const ctx=document.getElementById("peaceChart").getContext("2d");
+    let t=0;
+    function drawChart(){
+      ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
+      ctx.beginPath();
+      ctx.strokeStyle="#76e4f7";
+      for(let x=0;x<ctx.canvas.width;x++){
+        const y=60+Math.sin((x+t)/20)*20;
+        ctx.lineTo(x,y);
+      }
+      ctx.stroke();
+      t+=2; requestAnimationFrame(drawChart);
+    } drawChart();
+    
+    // === Sidebar toggle ===
+    function toggleSidebar(){
+      const sb=document.getElementById("sidebar");
+      sb.style.display=(sb.style.display==="none"?"flex":"none");
+    }
+    // === Avatar selector ===
+    function selectAvatar(img){
+      document.querySelectorAll(".avatars img").forEach(i=>i.classList.remove("selected"));
+      img.classList.add("selected");
+    }
+    // === Accessibility ===
+    function toggleContrast(){ document.body.classList.toggle("high-contrast"); }
+    function increaseFont(){ document.body.style.fontSize="larger"; }
+    
+    // === Proof explorer stubs ===
+    const proofs=[];
+    async function syncNow(){
+      proofs.push({hash:"sha256example", time:new Date().toLocaleTimeString()});
+      renderProofs();
+    }
+    function renderProofs(){
+      const ul=document.getElementById("proofList"); ul.innerHTML="";
+      proofs.forEach(p=>{
+        const li=document.createElement("li");
+        li.textContent=p.hash+" @ "+p.time; ul.appendChild(li);
+      });
+    }
+    function exportProofs(){
+      const blob=new Blob([JSON.stringify(proofs,null,2)],{type:"application/json"});
+      const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="proofs.json"; a.click();
+    }
+    
+    // === Service Worker (optional) ===
+    if("serviceWorker" in navigator){
+      navigator.serviceWorker.register(URL.createObjectURL(new Blob([`
+        self.addEventListener('install',e=>self.skipWaiting());
+        self.addEventListener('activate',e=>self.clients.claim());
+        self.addEventListener('fetch',e=>e.respondWith(fetch(e.request).catch(()=>caches.match(e.request))));
+      `],{type:'text/javascript'})));
+    }
+  </script>
+</body>
+</html>
